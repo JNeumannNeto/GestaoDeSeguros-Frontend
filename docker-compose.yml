@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  gestao-seguros-frontend:
+    build: .
+    container_name: gestao-seguros-frontend
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    networks:
+      - gestao-seguros-network
+    environment:
+      - API_PROPOSTA_URL=http://localhost:5001
+      - API_CONTRATACAO_URL=http://localhost:5002
+
+networks:
+  gestao-seguros-network:
+    driver: bridge

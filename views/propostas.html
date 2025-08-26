@@ -1,0 +1,228 @@
+<!-- Propostas Page -->
+<div class="fade-in">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-file-alt"></i> Gestão de Propostas</h2>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNovaProposta">
+            <i class="fas fa-plus"></i> Nova Proposta
+        </button>
+    </div>
+
+    <!-- Alert Messages -->
+    <div ng-show="alert.show" class="alert alert-{{alert.type}} alert-dismissible fade show" role="alert">
+        {{alert.message}}
+        <button type="button" class="btn-close" ng-click="hideAlert()"></button>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-filter"></i> Filtros</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <label class="form-label" for="filtro-status">Status</label>
+                    <select class="form-select" id="filtro-status" ng-model="filtros.status" ng-change="aplicarFiltros()">
+                        <option value="">Todos</option>
+                        <option ng-repeat="status in statusOptions" value="{{status.value}}">{{status.label}}</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label" for="filtro-tipo-cliente">Tipo de Cliente</label>
+                    <select class="form-select" id="filtro-tipo-cliente" ng-model="filtros.tipoCliente" ng-change="aplicarFiltros()">
+                        <option value="">Todos</option>
+                        <option ng-repeat="tipo in tiposCliente" value="{{tipo.value}}">{{tipo.label}}</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label" for="filtro-tipo-seguro">Tipo de Seguro</label>
+                    <select class="form-select" id="filtro-tipo-seguro" ng-model="filtros.tipoSeguro" ng-change="aplicarFiltros()">
+                        <option value="">Todos</option>
+                        <option value="0">Vida</option>
+                        <option value="1">Saúde</option>
+                        <option value="2">Automóvel</option>
+                        <option value="3">Residencial</option>
+                        <option value="4">Empresarial</option>
+                        <option value="5">Cargas</option>
+                        <option value="6">Frota</option>
+                        <option value="7">Condomínio</option>
+                        <option value="8">Vida Empresarial</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3 d-flex align-items-end">
+                    <button type="button" class="btn btn-secondary w-100" ng-click="limparFiltros()">
+                        <i class="fas fa-times"></i> Limpar Filtros
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Propostas Table -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-list"></i> Lista de Propostas 
+                <span class="badge bg-primary">{{propostasFiltradas.length}}</span>
+            </h5>
+        </div>
+        <div class="card-body">
+            <div ng-show="propostasFiltradas.length === 0" class="text-center text-muted py-5">
+                <i class="fas fa-inbox fa-3x mb-3"></i>
+                <h5>Nenhuma proposta encontrada</h5>
+                <p>Crie uma nova proposta ou ajuste os filtros</p>
+            </div>
+            
+            <div ng-show="propostasFiltradas.length > 0" class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Tipo Cliente</th>
+                            <th>Tipo Seguro</th>
+                            <th>Valor Cobertura</th>
+                            <th>Valor Prêmio</th>
+                            <th>Status</th>
+                            <th>Data Criação</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="proposta in propostasFiltradas">
+                            <td>
+                                <strong>{{proposta.nomeCliente}}</strong>
+                            </td>
+                            <td>{{getTipoClienteLabel(proposta.tipoCliente)}}</td>
+                            <td>{{getTipoSeguroLabel(proposta.tipoSeguro)}}</td>
+                            <td>{{formatCurrency(proposta.valorCobertura)}}</td>
+                            <td>{{formatCurrency(proposta.valorPremio)}}</td>
+                            <td>
+                                <span class="badge {{getStatusBadgeClass(proposta.status)}}">
+                                    {{getStatusLabel(proposta.status)}}
+                                </span>
+                            </td>
+                            <td>{{formatDate(proposta.dataCriacao)}}</td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <button ng-show="podeAprovar(proposta)" 
+                                            type="button" 
+                                            class="btn btn-success btn-sm" 
+                                            ng-click="alterarStatus(proposta, 1)"
+                                            title="Aprovar">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button ng-show="podeRejeitar(proposta)" 
+                                            type="button" 
+                                            class="btn btn-danger btn-sm" 
+                                            ng-click="alterarStatus(proposta, 2)"
+                                            title="Rejeitar">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                    <button ng-show="podeContratar(proposta)" 
+                                            type="button" 
+                                            class="btn btn-primary btn-sm" 
+                                            ng-click="contratarProposta(proposta)"
+                                            title="Contratar">
+                                        <i class="fas fa-handshake"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Nova Proposta -->
+<div class="modal fade" id="modalNovaProposta" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-plus"></i> Nova Proposta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form ng-submit="criarProposta()">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" for="nome-cliente">Nome do Cliente *</label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="nome-cliente"
+                                   ng-model="novaProposta.nomeCliente" 
+                                   placeholder="Digite o nome do cliente"
+                                   required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" for="modal-tipo-cliente">Tipo de Cliente *</label>
+                            <select class="form-select" 
+                                    id="modal-tipo-cliente"
+                                    ng-model="novaProposta.tipoCliente" 
+                                    ng-change="onTipoClienteChange()"
+                                    required>
+                                <option value="">Selecione...</option>
+                                <option ng-repeat="tipo in tiposCliente" ng-value="tipo.value">{{tipo.label}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" for="modal-tipo-seguro">Tipo de Seguro *</label>
+                            <select class="form-select" 
+                                    id="modal-tipo-seguro"
+                                    ng-model="novaProposta.tipoSeguro" 
+                                    ng-disabled="novaProposta.tipoCliente === ''"
+                                    required>
+                                <option value="">Selecione...</option>
+                                <option ng-repeat="seguro in tiposSeguro" ng-value="seguro.value">{{seguro.label}}</option>
+                            </select>
+                            <div ng-show="novaProposta.tipoCliente === ''" class="form-text">
+                                Selecione primeiro o tipo de cliente
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" for="valor-cobertura">Valor de Cobertura *</label>
+                            <input type="number" 
+                                   class="form-control" 
+                                   id="valor-cobertura"
+                                   ng-model="novaProposta.valorCobertura" 
+                                   placeholder="0.00"
+                                   step="0.01"
+                                   min="0.01"
+                                   required>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" for="valor-premio">Valor do Prêmio *</label>
+                            <input type="number" 
+                                   class="form-control" 
+                                   id="valor-premio"
+                                   ng-model="novaProposta.valorPremio" 
+                                   placeholder="0.00"
+                                   step="0.01"
+                                   min="0.01"
+                                   required>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Informação:</strong> A proposta será criada com status "Em Análise" e poderá ser aprovada ou rejeitada posteriormente.
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" ng-click="criarProposta()">
+                    <i class="fas fa-save"></i> Criar Proposta
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

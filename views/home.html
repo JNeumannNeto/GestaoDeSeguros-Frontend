@@ -1,0 +1,147 @@
+<!-- Home Page -->
+<div class="fade-in">
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="container">
+            <h1><i class="fas fa-shield-alt"></i> Sistema de Gestão de Seguros</h1>
+            <p>Gerencie propostas de seguro e contratações de forma simples e eficiente</p>
+        </div>
+    </div>
+
+    <!-- Alert Messages -->
+    <div ng-show="alert.show" class="alert alert-{{alert.type}} alert-dismissible fade show" role="alert">
+        {{alert.message}}
+        <button type="button" class="btn-close" ng-click="hideAlert()"></button>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stats-card">
+                <div class="stats-number">{{stats.totalPropostas}}</div>
+                <div class="stats-label">Total de Propostas</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stats-card">
+                <div class="stats-number">{{stats.propostasAprovadas}}</div>
+                <div class="stats-label">Propostas Aprovadas</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stats-card">
+                <div class="stats-number">{{stats.propostasEmAnalise}}</div>
+                <div class="stats-label">Em Análise</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stats-card">
+                <div class="stats-number">{{stats.totalContratacoes}}</div>
+                <div class="stats-label">Contratações</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Data -->
+    <div class="row">
+        <!-- Recent Propostas -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-file-alt"></i> Propostas Recentes</h5>
+                </div>
+                <div class="card-body">
+                    <div ng-show="recentPropostas.length === 0" class="text-center text-muted py-3">
+                        <i class="fas fa-inbox fa-2x mb-2"></i>
+                        <p>Nenhuma proposta encontrada</p>
+                    </div>
+                    <div ng-show="recentPropostas.length > 0">
+                        <div ng-repeat="proposta in recentPropostas" class="border-bottom pb-2 mb-2">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">{{proposta.nomeCliente}}</h6>
+                                    <small class="text-muted">
+                                        {{getTipoSeguroLabel(proposta.tipoSeguro)}} - 
+                                        {{formatCurrency(proposta.valorCobertura)}}
+                                    </small>
+                                </div>
+                                <span class="badge {{getStatusBadgeClass(proposta.status)}}">
+                                    {{getStatusLabel(proposta.status)}}
+                                </span>
+                            </div>
+                            <small class="text-muted">{{formatDate(proposta.dataCriacao)}}</small>
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="#!/propostas" class="btn btn-primary btn-sm">Ver Todas as Propostas</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Contratações -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-handshake"></i> Contratações Recentes</h5>
+                </div>
+                <div class="card-body">
+                    <div ng-show="recentContratacoes.length === 0" class="text-center text-muted py-3">
+                        <i class="fas fa-inbox fa-2x mb-2"></i>
+                        <p>Nenhuma contratação encontrada</p>
+                    </div>
+                    <div ng-show="recentContratacoes.length > 0">
+                        <div ng-repeat="contratacao in recentContratacoes" class="border-bottom pb-2 mb-2">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">{{contratacao.nomeCliente}}</h6>
+                                    <small class="text-muted">
+                                        Cobertura: {{formatCurrency(contratacao.valorCobertura)}}
+                                    </small>
+                                </div>
+                                <span class="badge bg-success">Contratado</span>
+                            </div>
+                            <small class="text-muted">{{formatDate(contratacao.dataContratacao)}}</small>
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="#!/contratacoes" class="btn btn-success btn-sm">Ver Todas as Contratações</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-bolt"></i> Ações Rápidas</h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <a href="#!/propostas" class="btn btn-primary btn-lg w-100">
+                                <i class="fas fa-plus-circle"></i><br>
+                                <small>Nova Proposta</small>
+                            </a>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <a href="#!/propostas" class="btn btn-warning btn-lg w-100">
+                                <i class="fas fa-list"></i><br>
+                                <small>Gerenciar Propostas</small>
+                            </a>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <a href="#!/contratacoes" class="btn btn-success btn-lg w-100">
+                                <i class="fas fa-handshake"></i><br>
+                                <small>Ver Contratações</small>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

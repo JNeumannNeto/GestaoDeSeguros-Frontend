@@ -1,0 +1,279 @@
+<!-- Contratações Page -->
+<div class="fade-in">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-handshake"></i> Gestão de Contratações</h2>
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalNovaContratacao">
+            <i class="fas fa-plus"></i> Nova Contratação
+        </button>
+    </div>
+
+    <!-- Alert Messages -->
+    <div ng-show="alert.show" class="alert alert-{{alert.type}} alert-dismissible fade show" role="alert">
+        {{alert.message}}
+        <button type="button" class="btn-close" ng-click="hideAlert()"></button>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4" ng-init="stats = calcularEstatisticas()">
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stats-card">
+                <div class="stats-number">{{stats.totalContratacoes}}</div>
+                <div class="stats-label">Total Contratações</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stats-card">
+                <div class="stats-number">{{formatCurrency(stats.valorTotalCobertura)}}</div>
+                <div class="stats-label">Valor Total Cobertura</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stats-card">
+                <div class="stats-number">{{formatCurrency(stats.valorTotalPremios)}}</div>
+                <div class="stats-label">Valor Total Prêmios</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stats-card">
+                <div class="stats-number">{{stats.contratosMesAtual}}</div>
+                <div class="stats-label">Contratos Este Mês</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-filter"></i> Filtros</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Nome do Cliente</label>
+                    <input type="text" 
+                           class="form-control" 
+                           ng-model="filtros.nomeCliente" 
+                           ng-change="aplicarFiltros()"
+                           placeholder="Digite o nome do cliente">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Data Início</label>
+                    <input type="date" 
+                           class="form-control" 
+                           ng-model="filtros.dataInicio" 
+                           ng-change="aplicarFiltros()">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Data Fim</label>
+                    <input type="date" 
+                           class="form-control" 
+                           ng-model="filtros.dataFim" 
+                           ng-change="aplicarFiltros()">
+                </div>
+                <div class="col-md-2 mb-3 d-flex align-items-end">
+                    <button type="button" class="btn btn-secondary w-100" ng-click="limparFiltros()">
+                        <i class="fas fa-times"></i> Limpar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions Bar -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <span class="text-muted">
+                Mostrando {{contratacoesFiltradas.length}} de {{paginacao.totalCount}} contratações
+                <span ng-show="paginacao.totalPages > 1">
+                    (Página {{paginacao.pageNumber}} de {{paginacao.totalPages}})
+                </span>
+            </span>
+        </div>
+        <div>
+            <button type="button" class="btn btn-outline-primary btn-sm" ng-click="exportarDados()">
+                <i class="fas fa-download"></i> Exportar
+            </button>
+        </div>
+    </div>
+
+    <!-- Contratações Table -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-list"></i> Lista de Contratações
+                <span class="badge bg-success">{{contratacoesFiltradas.length}}</span>
+            </h5>
+        </div>
+        <div class="card-body">
+            <div ng-show="contratacoesFiltradas.length === 0" class="text-center text-muted py-5">
+                <i class="fas fa-inbox fa-3x mb-3"></i>
+                <h5>Nenhuma contratação encontrada</h5>
+                <p>Faça uma nova contratação ou ajuste os filtros</p>
+            </div>
+            
+            <div ng-show="contratacoesFiltradas.length > 0" class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Cliente</th>
+                            <th>Data Contratação</th>
+                            <th>Valor Cobertura</th>
+                            <th>Valor Prêmio</th>
+                            <th>Proposta Original</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="contratacao in contratacoesFiltradas">
+                            <td>
+                                <small class="text-muted">{{contratacao.id.substring(0, 8)}}...</small>
+                            </td>
+                            <td>
+                                <strong>{{contratacao.nomeCliente}}</strong>
+                            </td>
+                            <td>{{formatDate(contratacao.dataContratacao)}}</td>
+                            <td>
+                                <span class="text-success fw-bold">
+                                    {{formatCurrency(contratacao.valorCobertura)}}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="text-primary fw-bold">
+                                    {{formatCurrency(contratacao.valorPremio)}}
+                                </span>
+                            </td>
+                            <td>
+                                <div ng-init="proposta = obterDetalhesProposta(contratacao.propostaId)">
+                                    <div ng-show="proposta">
+                                        <small class="text-muted">
+                                            {{getTipoSeguroLabel(proposta.tipoSeguro)}} - 
+                                            {{getTipoClienteLabel(proposta.tipoCliente)}}
+                                        </small>
+                                    </div>
+                                    <div ng-show="!proposta">
+                                        <small class="text-muted">Proposta não encontrada</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <button type="button" 
+                                        class="btn btn-outline-primary btn-sm" 
+                                        title="Ver Detalhes">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            <div ng-show="paginacao.totalPages > 1" class="d-flex justify-content-center mt-4">
+                <nav aria-label="Navegação de páginas">
+                    <ul class="pagination">
+                        <li class="page-item" ng-class="{disabled: !paginacao.hasPreviousPage}">
+                            <button class="page-link" ng-click="primeiraPagina()" ng-disabled="!paginacao.hasPreviousPage">
+                                <i class="fas fa-angle-double-left"></i>
+                            </button>
+                        </li>
+                        <li class="page-item" ng-class="{disabled: !paginacao.hasPreviousPage}">
+                            <button class="page-link" ng-click="paginaAnterior()" ng-disabled="!paginacao.hasPreviousPage">
+                                <i class="fas fa-angle-left"></i>
+                            </button>
+                        </li>
+                        
+                        <!-- Páginas numeradas -->
+                        <li class="page-item" 
+                            ng-repeat="page in [] | range:1:paginacao.totalPages" 
+                            ng-class="{active: page === paginacao.pageNumber}"
+                            ng-show="page >= paginacao.pageNumber - 2 && page <= paginacao.pageNumber + 2">
+                            <button class="page-link" ng-click="irParaPagina(page)">{{page}}</button>
+                        </li>
+                        
+                        <li class="page-item" ng-class="{disabled: !paginacao.hasNextPage}">
+                            <button class="page-link" ng-click="proximaPagina()" ng-disabled="!paginacao.hasNextPage">
+                                <i class="fas fa-angle-right"></i>
+                            </button>
+                        </li>
+                        <li class="page-item" ng-class="{disabled: !paginacao.hasNextPage}">
+                            <button class="page-link" ng-click="ultimaPagina()" ng-disabled="!paginacao.hasNextPage">
+                                <i class="fas fa-angle-double-right"></i>
+                            </button>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Nova Contratação -->
+<div class="modal fade" id="modalNovaContratacao" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-handshake"></i> Nova Contratação</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div ng-show="propostasAprovadas.length === 0" class="text-center text-muted py-4">
+                    <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+                    <h5>Nenhuma proposta disponível</h5>
+                    <p>Não há propostas aprovadas disponíveis para contratação.</p>
+                    <a href="#!/propostas" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Criar Nova Proposta
+                    </a>
+                </div>
+                
+                <div ng-show="propostasAprovadas.length > 0">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Informação:</strong> Selecione uma proposta aprovada para realizar a contratação.
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Propostas Aprovadas Disponíveis</label>
+                        <div class="row">
+                            <div ng-repeat="proposta in propostasAprovadas" class="col-12 mb-3">
+                                <div class="card border-success">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-md-8">
+                                                <h6 class="card-title mb-1">{{proposta.nomeCliente}}</h6>
+                                                <p class="card-text mb-1">
+                                                    <small class="text-muted">
+                                                        {{getTipoSeguroLabel(proposta.tipoSeguro)}} - 
+                                                        {{getTipoClienteLabel(proposta.tipoCliente)}}
+                                                    </small>
+                                                </p>
+                                                <p class="card-text mb-0">
+                                                    <strong>Cobertura:</strong> {{formatCurrency(proposta.valorCobertura)}} | 
+                                                    <strong>Prêmio:</strong> {{formatCurrency(proposta.valorPremio)}}
+                                                </p>
+                                                <small class="text-muted">
+                                                    Criada em: {{formatDateOnly(proposta.dataCriacao)}}
+                                                </small>
+                                            </div>
+                                            <div class="col-md-4 text-end">
+                                                <button type="button" 
+                                                        class="btn btn-success" 
+                                                        ng-click="contratarProposta(proposta.id)">
+                                                    <i class="fas fa-handshake"></i> Contratar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
