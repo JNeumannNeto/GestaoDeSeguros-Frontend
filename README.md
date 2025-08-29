@@ -59,8 +59,8 @@ GestaoDeSeguros-Frontend/
 ### Pré-requisitos
 - Servidor web (pode ser um servidor local simples)
 - Os microserviços backend rodando:
-  - PropostaService na porta 7001
-  - ContratacaoService na porta 7002
+  - PropostaService na porta 5001 (HTTP) ou 7001 (HTTPS)
+  - ContratacaoService na porta 5002 (HTTP) ou 7002 (HTTPS)
 
 ## Configuração das APIs
 
@@ -68,10 +68,14 @@ As URLs das APIs estão configuradas no arquivo `js/app.js`:
 
 ```javascript
 .constant('API_CONFIG', {
-    PROPOSTA_SERVICE: 'https://localhost:7001/api',
-    CONTRATACAO_SERVICE: 'https://localhost:7002/api'
+    PROPOSTA_SERVICE: 'http://localhost:5001/api',
+    CONTRATACAO_SERVICE: 'http://localhost:5002/api'
 });
 ```
+
+**Nota:** O frontend está configurado para usar HTTP nas portas 5001 e 5002. Se você quiser usar HTTPS, altere as URLs no arquivo `js/app.js` para:
+- `https://localhost:7001/api` (PropostaService)
+- `https://localhost:7002/api` (ContratacaoService)
 
 Certifique-se de que os microserviços backend estejam rodando nas portas corretas.
 
